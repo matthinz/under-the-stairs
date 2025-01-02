@@ -1,128 +1,295 @@
-
 INCHES = 1;
 
-width = 66 * INCHES;
+TOTAL_WIDTH = 66 * INCHES;
 
-drywall_thickness = (1/2) * INCHES;
-flooring_thickness = (1/2) * INCHES;
+DRYWALL_THICKNESS = (1/2) * INCHES;
+FLOORING_THICKNESS = (3/8) * INCHES;
+SUBFLOOR_THICKNESS = (7/8) * INCHES;
+DIVIDER_WALL_TRIM_THICKNESS = (5/8) * INCHES;
 
-tall_wall_height = (70 + (1/2)) * INCHES;
-short_wall_height = (19 + (7/8)) * INCHES;
+ENTRY_SIDE_DEPTH = (21 + (3/8)) * INCHES;
+DIVIDER_WALL_THICKNESS = (3/4) * INCHES;
+DIVIDER_WALL_TRIM = 1.5 * INCHES;
+HALLWAY_SIDE_DEPTH = (22 + (3/8)) * INCHES;
 
-hallway_side_depth = (22 + (3/8)) * INCHES;
-entry_side_depth = (21 + (3/8)) * INCHES;
+TOTAL_DEPTH = ENTRY_SIDE_DEPTH + HALLWAY_SIDE_DEPTH + DIVIDER_WALL_THICKNESS;
 
-divider_wall_thickness = (3/4) * INCHES;
+SUNKEN_AREA_HEIGHT = (6 + (1/8)) * INCHES;
+SUNKEN_AREA_WIDTH = 21 * INCHES;
 
-step_height = (6 + (1/8)) * INCHES;
-step_width = 21 * INCHES;
+TALL_WALL_HEIGHT = (70 + (1/2)) * INCHES;
+TALL_WALL_HEIGHT_FROM_ORIGIN = TALL_WALL_HEIGHT + SUBFLOOR_THICKNESS + FLOORING_THICKNESS;
 
-hall_side_floor_width = width - step_width - flooring_thickness;
+SHORT_WALL_HEIGHT = (19 + (7/8)) * INCHES;
+SHORT_WALL_HEIGHT_FROM_ORIGIN = SUBFLOOR_THICKNESS + SUNKEN_AREA_HEIGHT + SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SHORT_WALL_HEIGHT;
 
-hall_side_sticky_outy_part_depth = 2 * INCHES;
-hall_side_sticky_outy_part_extra_height = 2 * INCHES;
+HALLWAY_SIDE_STICKY_OUTY_PART_DEPTH = 2 * INCHES;
 
-total_depth = hallway_side_depth + entry_side_depth + divider_wall_thickness;
+module cube_at_origin(size) {
+  translate([size[0] / 2, size[1] / 2, size[2] / 2])
+    cube(size, center=true);
+}
 
-rotate([0,0,$t]) {
+module cube_at(point, size) {
+  translate(point)
+    cube_at_origin(size);
+}
 
-  color("red") {
-      // Step surface
-      translate([(step_width / 2) + drywall_thickness, hallway_side_depth / 2, flooring_thickness / 2])
-        cube([step_width, hallway_side_depth, flooring_thickness], center=true);
+module cube_at_points(nw, ne, se, sw, thickness) {
+  polyhedron(
+    // move clockwise starting from nw
+    points = [
+      /* 0 */ nw,
+      /* 1 */ [nw[0], nw[1], nw[2] + thickness],
+      /* 2 */ ne,
+      /* 3 */ [ne[0], ne[1], ne[2] + thickness],
+      /* 4 */ se,
+      /* 5 */ [se[0], se[1], se[2] + thickness],
+      /* 6 */ sw,
+      /* 7 */ [sw[0], sw[1], sw[2] + thickness],
+    ],
+    faces = [
+      // NW -> SW
+      [0, 1, 6, 7],
+      // NW -> NE
+      [0, 1, 2, 3],
+      // NE -> SE
+      [2, 3, 4, 5],
+      // SE -> SW
+      [4, 5, 6, 7],
+      // Bottom
+      [0, 2, 4, 6],
+      // top
+      [1, 3, 5, 7],
+    ]
+  );
+}
 
-  }
-    // Step walls
-  color("purple") {
-    translate([drywall_thickness / 2, hallway_side_depth / 2, flooring_thickness + step_height / 2])
-      cube([drywall_thickness, hallway_side_depth, step_height], center=true);
+module subfloor() {
+
+  // Floor above sunken area
+  cube_at(
+    point = [
+      0,
+      HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM,
+      SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT - FLOORING_THICKNESS - SUBFLOOR_THICKNESS,
+    ],
+    size = [
+      DRYWALL_THICKNESS + SUNKEN_AREA_WIDTH + FLOORING_THICKNESS,
+      ENTRY_SIDE_DEPTH + DIVIDER_WALL_TRIM + DIVIDER_WALL_THICKNESS,
+      SUBFLOOR_THICKNESS
+
+    ]
+  );
 
 
+  // Sunken area side wall
+  cube_at(
+    point = [
+      DRYWALL_THICKNESS + SUNKEN_AREA_WIDTH + FLOORING_THICKNESS,
+      0,
+      SUBFLOOR_THICKNESS
+    ],
+    size = [
+      SUBFLOOR_THICKNESS,
+      HALLWAY_SIDE_DEPTH - FLOORING_THICKNESS - SUBFLOOR_THICKNESS,
+      SUNKEN_AREA_HEIGHT - SUBFLOOR_THICKNESS
+    ]
+  );
 
-    translate([drywall_thickness + (step_width / 2), (flooring_thickness/2) + hallway_side_depth, flooring_thickness + step_height / 2])
-      cube([step_width, flooring_thickness, step_height], center=true);
+  // Sunken area rear wall
+  cube_at(
+    point = [
+      0,
+      HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM,
+      SUBFLOOR_THICKNESS
+    ],
+    size = [
+      DRYWALL_THICKNESS + SUNKEN_AREA_WIDTH + FLOORING_THICKNESS + SUBFLOOR_THICKNESS,
+      SUBFLOOR_THICKNESS,
+      SUNKEN_AREA_HEIGHT - SUBFLOOR_THICKNESS
+    ]
+  );
 
-    translate([drywall_thickness + (flooring_thickness / 2) + step_width, hallway_side_depth / 2, flooring_thickness + step_height / 2])
-      cube([flooring_thickness, hallway_side_depth, step_height], center=true);
-  }
+  // Sunken area floor
+  cube_at(
+    point = [
+      0,
+      0,
+      0,
+    ],
+    size = [
+      DRYWALL_THICKNESS + SUNKEN_AREA_WIDTH + FLOORING_THICKNESS + SUBFLOOR_THICKNESS,
+      HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM  + SUBFLOOR_THICKNESS,
+      SUBFLOOR_THICKNESS
+    ]
+  );
 
-  // Hall side floor
-  translate([
-    (hall_side_floor_width / 2) + drywall_thickness + step_width + flooring_thickness,
-    hallway_side_depth / 2,
-    (flooring_thickness / 2)+ step_height
-  ])
-    cube([hall_side_floor_width, hallway_side_depth, flooring_thickness], center=true);
+  // Big piece under short wall
+  cube_at(
+    point = [
+      DRYWALL_THICKNESS + SUNKEN_AREA_WIDTH + FLOORING_THICKNESS,
+      0,
+      SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT - FLOORING_THICKNESS - SUBFLOOR_THICKNESS
+    ],
+    size = [
+      TOTAL_WIDTH - SUNKEN_AREA_WIDTH - FLOORING_THICKNESS + DRYWALL_THICKNESS,
+      HALLWAY_SIDE_DEPTH + DIVIDER_WALL_THICKNESS + ENTRY_SIDE_DEPTH,
+      SUBFLOOR_THICKNESS,
+    ]
+  );
 
+
+}
+
+module walls_and_ceiling() {
   // Tall wall
-  color("blue") {
-    translate([drywall_thickness/2, total_depth/2, (tall_wall_height/2) + flooring_thickness + step_height])
-      cube([drywall_thickness, total_depth, tall_wall_height], center=true);
+  cube_at(
+    point = [
+      0,
+      0,
+      SUBFLOOR_THICKNESS
+    ],
+    size = [
+      DRYWALL_THICKNESS,
+      TOTAL_DEPTH,
+      TALL_WALL_HEIGHT
+    ]
+  );
 
-    // sticky-outy part
-    translate([
-      drywall_thickness / 2,
-      (hall_side_sticky_outy_part_depth / 2) * -1,
-      (tall_wall_height + step_height + hall_side_sticky_outy_part_extra_height) / 2
-    ])
-    cube([drywall_thickness, hall_side_sticky_outy_part_depth, tall_wall_height + step_height + hall_side_sticky_outy_part_extra_height], center=true);
-  }
+  translate([0, 0, SUBFLOOR_THICKNESS])
+    cube_at_origin([DRYWALL_THICKNESS, HALLWAY_SIDE_DEPTH, SUNKEN_AREA_HEIGHT])
+
+  // sticky-outy part
+  translate([0, -HALLWAY_SIDE_STICKY_OUTY_PART_DEPTH, SUBFLOOR_THICKNESS])
+    cube_at_origin([DRYWALL_THICKNESS, HALLWAY_SIDE_STICKY_OUTY_PART_DEPTH, TALL_WALL_HEIGHT + SUNKEN_AREA_HEIGHT]);
 
   // Short wall
-  translate([width + drywall_thickness * 1.5, total_depth/2, (short_wall_height/2) + flooring_thickness + step_height])
-    cube([drywall_thickness, total_depth, short_wall_height], center=true);
+  translate([DRYWALL_THICKNESS + TOTAL_WIDTH, 0, SUBFLOOR_THICKNESS + SUNKEN_AREA_HEIGHT])
+    cube_at_origin([DRYWALL_THICKNESS, TOTAL_DEPTH, SHORT_WALL_HEIGHT + FLOORING_THICKNESS]);
 
   // Ceiling
-  color("green") {
-    translate([0, 0, step_height])
-      polyhedron([
-        // Short wall
-        [drywall_thickness + width, 0, flooring_thickness + short_wall_height],
-        [drywall_thickness + width, total_depth, flooring_thickness + short_wall_height],
+  cube_at_points(
+    nw = [DRYWALL_THICKNESS, 0, TALL_WALL_HEIGHT_FROM_ORIGIN],
+    ne = [DRYWALL_THICKNESS, TOTAL_DEPTH, TALL_WALL_HEIGHT_FROM_ORIGIN],
+    sw = [DRYWALL_THICKNESS + TOTAL_WIDTH, 0, SHORT_WALL_HEIGHT_FROM_ORIGIN],
+    se = [DRYWALL_THICKNESS + TOTAL_WIDTH, TOTAL_DEPTH, SHORT_WALL_HEIGHT_FROM_ORIGIN],
+    thickness = DRYWALL_THICKNESS
+  );
 
-        // Tall wall
-        [drywall_thickness, 0, tall_wall_height + flooring_thickness],
-        [drywall_thickness, total_depth, tall_wall_height + flooring_thickness],
+}
+
+module flooring() {
+
+  // Floor of sunken area
+  cube_at(
+    point = [
+      DRYWALL_THICKNESS,
+      0,
+      SUBFLOOR_THICKNESS
+    ],
+    size = [
+      SUNKEN_AREA_WIDTH + FLOORING_THICKNESS,
+      HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM,
+      FLOORING_THICKNESS
+    ]
+  );
+
+  // Sunken area rear wall
+  cube_at(
+    point = [
+      DRYWALL_THICKNESS,
+      (HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM) - FLOORING_THICKNESS,
+      SUBFLOOR_THICKNESS + FLOORING_THICKNESS,
+    ],
+    size = [
+      SUNKEN_AREA_WIDTH,
+      FLOORING_THICKNESS,
+      SUNKEN_AREA_HEIGHT
+    ]
+  );
+
+  // Sunken area side wall
+  cube_at(
+    point = [
+      DRYWALL_THICKNESS + SUNKEN_AREA_WIDTH,
+      0,
+      SUBFLOOR_THICKNESS + FLOORING_THICKNESS
+    ],
+    size = [
+      FLOORING_THICKNESS,
+      HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM,
+      SUNKEN_AREA_HEIGHT - FLOORING_THICKNESS
+    ]
+  );
+
+  // Floor of hallway side
+  cube_at(
+    point = [
+      DRYWALL_THICKNESS + SUNKEN_AREA_WIDTH,
+      0,
+      SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT - FLOORING_THICKNESS
+    ],
+    size = [
+      TOTAL_WIDTH - SUNKEN_AREA_WIDTH,
+      HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM,
+      FLOORING_THICKNESS
+    ]
+  );
+
+  // Divider wall trim (hallway side)
+  cube_at(
+    point = [
+      DRYWALL_THICKNESS,
+      HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM,
+      SUBFLOOR_THICKNESS + SUNKEN_AREA_HEIGHT
+    ],
+    size = [
+      TOTAL_WIDTH,
+      DIVIDER_WALL_TRIM,
+      DIVIDER_WALL_TRIM_THICKNESS
+    ]
+  );
+
+  // Divider wall trim (entry side)
+  cube_at(
+    point = [
+      DRYWALL_THICKNESS,
+      HALLWAY_SIDE_DEPTH + DIVIDER_WALL_THICKNESS,
+      SUBFLOOR_THICKNESS + SUNKEN_AREA_HEIGHT
+    ],
+    size = [
+      TOTAL_WIDTH,
+      DIVIDER_WALL_TRIM,
+      DIVIDER_WALL_TRIM_THICKNESS
+    ]
+  );
+
+  // Floor of entry side
+  cube_at(
+    point = [
+      DRYWALL_THICKNESS,
+      HALLWAY_SIDE_DEPTH + DIVIDER_WALL_THICKNESS + DIVIDER_WALL_TRIM,
+      SUBFLOOR_THICKNESS + SUNKEN_AREA_HEIGHT,
+    ],
+    size = [
+      TOTAL_WIDTH,
+      ENTRY_SIDE_DEPTH - DIVIDER_WALL_TRIM,
+      FLOORING_THICKNESS
+    ]
+  );
+
+}
 
 
-        // Short wall
-        [drywall_thickness + width, 0, flooring_thickness + short_wall_height + drywall_thickness],
-        [drywall_thickness + width, total_depth, flooring_thickness + short_wall_height + drywall_thickness],
+#color("gray") {
+  subfloor();
+}
 
-        // Tall wall
-        [drywall_thickness, 0, tall_wall_height + flooring_thickness + drywall_thickness],
-        [drywall_thickness, total_depth, tall_wall_height + flooring_thickness + drywall_thickness],
+color("LemonChiffon") {
+  walls_and_ceiling();
+}
 
-      ], faces = [
-        [0, 1, 2, 3],
-        [4, 5, 6, 7],
-        [0,1,5,4],
-        [0,4,2,6],
-        [1,5,4,7],
-        [2,3,7,6]
-      ]);
-  }
-
-  // Divider wall
-  // color("brown") {
-  //  polyhedron(
-  //   points=[
-  //     // hall side
-  //     [drywall_thickness, hallway_side_depth, flooring_thickness],
-  //     [drywall_thickness + width, hallway_side_depth, flooring_thickness],
-  //     [drywall_thickness + width, hallway_side_depth, flooring_thickness + short_wall_height],
-  //     [drywall_thickness, hallway_side_depth, flooring_thickness + tall_wall_height],
-
-  //     // entry side
-  //     [drywall_thickness, hallway_side_depth + divider_wall_thickness, flooring_thickness],
-  //     [drywall_thickness + width, hallway_side_depth + divider_wall_thickness, flooring_thickness],
-  //     [drywall_thickness + width, hallway_side_depth + divider_wall_thickness, flooring_thickness + short_wall_height],
-  //     [drywall_thickness, hallway_side_depth + divider_wall_thickness, flooring_thickness + tall_wall_height],
-
-  //   ],
-  //   faces = [
-  //     [0,1,2,3],
-  //     [4,5,6,7],
-  //   ]);
-  // }
+color("Sienna") {
+  flooring();
 }
