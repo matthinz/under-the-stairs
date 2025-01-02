@@ -159,8 +159,16 @@ module walls_and_ceiling() {
   
   // sticky-outy part
   cube_at(
-    point = [0, -HALLWAY_SIDE_STICKY_OUTY_PART_DEPTH, 0],
-    size = [DRYWALL_THICKNESS, HALLWAY_SIDE_STICKY_OUTY_PART_DEPTH, FLOORING_THICKNESS + TALL_WALL_HEIGHT ]
+    point = [
+      0, 
+      -HALLWAY_SIDE_STICKY_OUTY_PART_DEPTH, 
+      0
+    ],
+    size = [
+      DRYWALL_THICKNESS, 
+      HALLWAY_SIDE_STICKY_OUTY_PART_DEPTH, 
+      SUBFLOOR_THICKNESS + FLOORING_THICKNESS + TALL_WALL_HEIGHT 
+    ]
   );
 
   // Short wall
@@ -293,6 +301,65 @@ module flooring() {
 
 }
 
+module divider_wall() {
+  
+  divider_wall_y = HALLWAY_SIDE_DEPTH;
+  tall_wall_top_z = SUBFLOOR_THICKNESS + FLOORING_THICKNESS + TALL_WALL_HEIGHT;
+  short_wall_top_z = SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT + SHORT_WALL_HEIGHT;
+  short_wall_bottom_z = SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT;
+  short_wall_x = DRYWALL_THICKNESS + TOTAL_WIDTH;
+
+  nw_front = [ DRYWALL_THICKNESS, divider_wall_y, tall_wall_top_z];
+  nw_back = [ DRYWALL_THICKNESS, divider_wall_y + DIVIDER_WALL_THICKNESS, short_wall_bottom_z];
+
+  ne_front = [short_wall_x, divider_wall_y, short_wall_top_z];
+  ne_back = [short_wall_x, divider_wall_y + DIVIDER_WALL_THICKNESS, short_wall_top_z];
+
+  se_front = [ short_wall_x, divider_wall_y, short_wall_bottom_z];
+  se_back = [ short_wall_x, divider_wall_y + DIVIDER_WALL_THICKNESS, short_wall_bottom_z];
+  
+  sw_front = [ DRYWALL_THICKNESS, divider_wall_y,  short_wall_bottom_z];
+  sw_back = [ DRYWALL_THICKNESS, divider_wall_y + DIVIDER_WALL_THICKNESS, short_wall_bottom_z];
+
+  _nw_front = 0;
+  _nw_back = 1;
+  _ne_front = 2;
+  _ne_back = 3;
+  _se_front = 4;
+  _se_back = 5;
+  _sw_front = 6;
+  _sw_back = 7;
+  
+  front_face = [_nw_front, _ne_front, _se_front, _sw_front];
+  back_face = [_nw_back, _ne_back, _se_back, _sw_back];
+  left_face = [_nw_front, _nw_back, _sw_back, _sw_front];
+  right_face = [_ne_front, _ne_back, _se_back, _se_front];
+  top_face = [_nw_front, _ne_front, _ne_back, _nw_back];
+  bottom_face = [_sw_front, _se_front, _se_back, _sw_back]; 
+
+  polyhedron(
+    points = [
+      nw_front,
+      nw_back,
+      ne_front,
+      ne_back,
+      se_front,
+      se_back,
+      sw_front,
+      sw_back,
+    ],
+    faces = [
+      front_face,
+      back_face,
+      left_face,
+      right_face,
+      top_face,
+      bottom_face,
+    ]
+  );
+
+}
+
 
 color("gray") {
   subfloor();
@@ -304,4 +371,9 @@ color("LemonChiffon") {
 
 color("Sienna") {
   flooring();
+}
+
+color("Peru") {
+    divider_wall();
+
 }
