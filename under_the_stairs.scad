@@ -1,4 +1,5 @@
-INCHES = 1;
+include <utils.scad>;
+include <litter_box.scad>;
 
 TOTAL_WIDTH = 66 * INCHES;
 
@@ -433,6 +434,15 @@ module divider_wall() {
 
 }
 
+module litter_box_at_current_position() {
+  translate([
+    (LITTER_BOX_DEPTH / 2) + DRYWALL_THICKNESS + (2*INCHES), 
+    (LITTER_BOX_WIDTH / 2) + HALLWAY_SIDE_DEPTH + DIVIDER_WALL_THICKNESS + (2 * INCHES),
+    SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT + (LITTER_BOX_HEIGHT / 2),
+  ])
+    rotate([0, 0, 90])
+    litter_box();
+}
 
 color("gray") {
   subfloor();
@@ -448,5 +458,8 @@ color("Sienna") {
 
 color("Peru") {
     divider_wall();
+}
 
+color("White") {
+  litter_box_at_current_position();
 }
