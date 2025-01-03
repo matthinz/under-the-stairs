@@ -17,7 +17,7 @@ TOTAL_DEPTH = ENTRY_SIDE_DEPTH + HALLWAY_SIDE_DEPTH + DIVIDER_WALL_THICKNESS;
 SUNKEN_AREA_HEIGHT = (6 + (1/8)) * INCHES;
 SUNKEN_AREA_WIDTH = 21 * INCHES;
 
-TALL_WALL_HEIGHT = (70 + (1/2)) * INCHES;
+TALL_WALL_HEIGHT = (77 + (5/8)) * INCHES;
 
 SHORT_WALL_HEIGHT = (19 + (7/8)) * INCHES;
 SHORT_WALL_HEIGHT_FROM_ORIGIN = SUBFLOOR_THICKNESS + SUNKEN_AREA_HEIGHT + SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SHORT_WALL_HEIGHT;
@@ -152,7 +152,7 @@ module walls_and_ceiling() {
     size = [
       DRYWALL_THICKNESS,
       TOTAL_DEPTH,
-      FLOORING_THICKNESS + TALL_WALL_HEIGHT
+      FLOORING_THICKNESS + TALL_WALL_HEIGHT + DRYWALL_THICKNESS
     ]
   );
 
@@ -181,7 +181,7 @@ module walls_and_ceiling() {
     size = [
       DRYWALL_THICKNESS,
       TOTAL_DEPTH,
-      FLOORING_THICKNESS +  SHORT_WALL_HEIGHT
+      FLOORING_THICKNESS + SHORT_WALL_HEIGHT + DRYWALL_THICKNESS
     ]
   );
 
@@ -330,33 +330,62 @@ module divider_wall() {
   _sw_front = 6;
   _sw_back = 7;
   
-  front_face = [_nw_front, _ne_front, _se_front, _sw_front];
-  back_face = [_nw_back, _ne_back, _se_back, _sw_back];
-  left_face = [_nw_front, _nw_back, _sw_back, _sw_front];
-  right_face = [_ne_front, _ne_back, _se_back, _se_front];
-  top_face = [_nw_front, _ne_front, _ne_back, _nw_back];
+  front_face =  [_nw_front, _ne_front, _se_front, _sw_front];
+  back_face =   [_ne_back, _nw_back, _sw_back, _se_back];
+  left_face =   [_nw_back, _nw_front, _sw_front, _sw_back, ];
+  right_face =  [_ne_front, _ne_back, _se_back, _se_front];
+  top_face =    [_nw_front, _nw_back,  _ne_back, _ne_front, ];
   bottom_face = [_sw_front, _se_front, _se_back, _sw_back]; 
 
-  polyhedron(
-    points = [
-      nw_front,
-      nw_back,
-      ne_front,
-      ne_back,
-      se_front,
-      se_back,
-      sw_front,
-      sw_back,
-    ],
-    faces = [
-      front_face,
-      back_face,
-      left_face,
-      right_face,
-      top_face,
-      bottom_face,
-    ]
-  );
+  door_point =  [
+    DRYWALL_THICKNESS + 4 * INCHES,
+    divider_wall_y,
+    short_wall_bottom_z + FLOORING_THICKNESS + 18.5 * INCHES,
+  ];
+  
+  door_size = [
+    12 * INCHES,
+    DIVIDER_WALL_THICKNESS,
+    (32 + (7/8)) * INCHES,
+  ];
+
+  
+  difference() {
+    polyhedron(
+      points = [
+        nw_front,
+        nw_back,
+        ne_front,
+        ne_back,
+        se_front,
+        se_back,
+        sw_front,
+        sw_back,
+      ],
+      faces = [
+        front_face,
+        back_face,
+        left_face,
+        right_face,
+        top_face,
+        bottom_face,
+      ],
+      convexity = 1
+    );
+
+    cube_at(
+      point = [
+        door_point[0], 
+        door_point[1] - (1 * INCHES),
+        door_point[2],
+      ],
+      size = [
+        door_size[0],
+        door_size[1] + (2 * INCHES),
+        door_size[2],
+      ]
+    );
+  }
 
 }
 
