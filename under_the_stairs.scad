@@ -152,7 +152,7 @@ module walls_and_ceiling() {
     size = [
       DRYWALL_THICKNESS,
       TOTAL_DEPTH,
-      FLOORING_THICKNESS + TALL_WALL_HEIGHT + DRYWALL_THICKNESS
+      FLOORING_THICKNESS + TALL_WALL_HEIGHT
     ]
   );
 
@@ -187,14 +187,58 @@ module walls_and_ceiling() {
 
   // Ceiling
   TALL_WALL_HEIGHT_FROM_ORIGIN = TALL_WALL_HEIGHT + SUBFLOOR_THICKNESS + FLOORING_THICKNESS;
-  SHORT_WALL_HEIGHT_FROM_ORIGIN = SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT + SHORT_WALL_HEIGHT;
+  SHORT_WALL_HEIGHT_FROM_ORIGIN = SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT + FLOORING_THICKNESS + SHORT_WALL_HEIGHT;
 
-  cube_at_points(
-    nw = [DRYWALL_THICKNESS, 0, TALL_WALL_HEIGHT_FROM_ORIGIN],
-    ne = [DRYWALL_THICKNESS, TOTAL_DEPTH, TALL_WALL_HEIGHT_FROM_ORIGIN],
-    sw = [DRYWALL_THICKNESS + TOTAL_WIDTH, 0, SHORT_WALL_HEIGHT_FROM_ORIGIN],
-    se = [DRYWALL_THICKNESS + TOTAL_WIDTH, TOTAL_DEPTH, SHORT_WALL_HEIGHT_FROM_ORIGIN],
-    thickness = DRYWALL_THICKNESS
+  // viewed from hallway side
+  nw_front = [DRYWALL_THICKNESS, 0, TALL_WALL_HEIGHT_FROM_ORIGIN + DRYWALL_THICKNESS];
+  nw_back = [DRYWALL_THICKNESS, TOTAL_DEPTH, TALL_WALL_HEIGHT_FROM_ORIGIN + DRYWALL_THICKNESS];
+
+  ne_front = [DRYWALL_THICKNESS + TOTAL_WIDTH, 0, SHORT_WALL_HEIGHT_FROM_ORIGIN + DRYWALL_THICKNESS];
+  ne_back = [DRYWALL_THICKNESS + TOTAL_WIDTH, TOTAL_DEPTH, SHORT_WALL_HEIGHT_FROM_ORIGIN + DRYWALL_THICKNESS];
+
+  se_front = [DRYWALL_THICKNESS + TOTAL_WIDTH, 0, SHORT_WALL_HEIGHT_FROM_ORIGIN];
+  se_back = [DRYWALL_THICKNESS + TOTAL_WIDTH, TOTAL_DEPTH, SHORT_WALL_HEIGHT_FROM_ORIGIN];
+
+  sw_front = [DRYWALL_THICKNESS, 0, TALL_WALL_HEIGHT_FROM_ORIGIN];
+  sw_back = [DRYWALL_THICKNESS, TOTAL_DEPTH, TALL_WALL_HEIGHT_FROM_ORIGIN];
+
+  
+  _nw_front = 0;
+  _nw_back = 1;
+  _ne_front = 2;
+  _ne_back = 3;
+  _se_front = 4;
+  _se_back = 5;
+  _sw_front = 6;
+  _sw_back = 7;
+
+  top_face = [_nw_front, _nw_back, _ne_back, _ne_front];
+  bottom_face = [_sw_back, _sw_front, _se_front, _se_back];
+  front_face = [_nw_front, _ne_front, _se_front, _sw_front];
+  back_face = [_ne_back, _nw_back, _sw_back, _se_back];
+  right_face = [_ne_front, _ne_back, _se_back, _se_front];
+  left_face = [_nw_back, _nw_front, _sw_front, _sw_back];
+  
+  polyhedron(
+    points = [
+      nw_front,
+      nw_back,
+      ne_front,
+      ne_back,
+      se_front,
+      se_back,
+      sw_front,
+      sw_back,
+    ],
+    faces = [
+      top_face,
+      bottom_face,
+      front_face,
+      back_face,
+      left_face,
+      right_face,
+    ],
+    convexity = 2
   );
 
 }
