@@ -159,7 +159,7 @@ module walls_and_ceiling(paint_color = "LemonChiffon") {
       size = [
         DRYWALL_THICKNESS,
         TOTAL_DEPTH,
-        FLOORING_THICKNESS + TALL_WALL_HEIGHT
+        FLOORING_THICKNESS + TALL_WALL_HEIGHT + DRYWALL_THICKNESS
       ]
     );
 
@@ -174,7 +174,7 @@ module walls_and_ceiling(paint_color = "LemonChiffon") {
       size = [
         DRYWALL_THICKNESS,
         HALLWAY_SIDE_STICKY_OUTY_PART_DEPTH,
-        SUBFLOOR_THICKNESS + FLOORING_THICKNESS + TALL_WALL_HEIGHT
+        SUBFLOOR_THICKNESS + FLOORING_THICKNESS + TALL_WALL_HEIGHT + DRYWALL_THICKNESS,
       ]
     );
 
@@ -188,7 +188,7 @@ module walls_and_ceiling(paint_color = "LemonChiffon") {
       size = [
         DRYWALL_THICKNESS,
         TOTAL_DEPTH,
-        FLOORING_THICKNESS + SHORT_WALL_HEIGHT + DRYWALL_THICKNESS
+        TALL_WALL_HEIGHT - (SUNKEN_AREA_HEIGHT + FLOORING_THICKNESS) + SUBFLOOR_THICKNESS + FLOORING_THICKNESS
       ]
     );
 
@@ -200,15 +200,14 @@ module walls_and_ceiling(paint_color = "LemonChiffon") {
     nw_front = [DRYWALL_THICKNESS, 0, TALL_WALL_HEIGHT_FROM_ORIGIN + DRYWALL_THICKNESS];
     nw_back = [DRYWALL_THICKNESS, TOTAL_DEPTH, TALL_WALL_HEIGHT_FROM_ORIGIN + DRYWALL_THICKNESS];
 
-    ne_front = [DRYWALL_THICKNESS + TOTAL_WIDTH, 0, SHORT_WALL_HEIGHT_FROM_ORIGIN + DRYWALL_THICKNESS];
-    ne_back = [DRYWALL_THICKNESS + TOTAL_WIDTH, TOTAL_DEPTH, SHORT_WALL_HEIGHT_FROM_ORIGIN + DRYWALL_THICKNESS];
+    ne_front = [DRYWALL_THICKNESS + TOTAL_WIDTH, 0, TALL_WALL_HEIGHT_FROM_ORIGIN + DRYWALL_THICKNESS];
+    ne_back = [DRYWALL_THICKNESS + TOTAL_WIDTH, TOTAL_DEPTH, TALL_WALL_HEIGHT_FROM_ORIGIN + DRYWALL_THICKNESS];
 
     se_front = [DRYWALL_THICKNESS + TOTAL_WIDTH, 0, SHORT_WALL_HEIGHT_FROM_ORIGIN];
     se_back = [DRYWALL_THICKNESS + TOTAL_WIDTH, TOTAL_DEPTH, SHORT_WALL_HEIGHT_FROM_ORIGIN];
 
     sw_front = [DRYWALL_THICKNESS, 0, TALL_WALL_HEIGHT_FROM_ORIGIN];
     sw_back = [DRYWALL_THICKNESS, TOTAL_DEPTH, TALL_WALL_HEIGHT_FROM_ORIGIN];
-
 
     _nw_front = 0;
     _nw_back = 1;
@@ -226,28 +225,45 @@ module walls_and_ceiling(paint_color = "LemonChiffon") {
     right_face = [_ne_front, _ne_back, _se_back, _se_front];
     left_face = [_nw_back, _nw_front, _sw_front, _sw_back];
 
-    polyhedron(
-      points = [
-        nw_front,
-        nw_back,
-        ne_front,
-        ne_back,
-        se_front,
-        se_back,
-        sw_front,
-        sw_back,
+    difference() {
+      polyhedron(
+        points = [
+          nw_front,
+          nw_back,
+          ne_front,
+          ne_back,
+          se_front,
+          se_back,
+          sw_front,
+          sw_back,
+        ],
+        faces = [
+          top_face,
+          bottom_face,
+          front_face,
+          back_face,
+          left_face,
+          right_face,
+        ],
+        convexity = 2
+      );
+    }
+
+    // entry side right lip
+    cube_at(
+      point = [
+        DRYWALL_THICKNESS,
+        TOTAL_DEPTH,
+        SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT + FLOORING_THICKNESS,
       ],
-      faces = [
-        top_face,
-        bottom_face,
-        front_face,
-        back_face,
-        left_face,
-        right_face,
-      ],
-      convexity = 2
+      size = [
+        1 * INCH,
+        DRYWALL_THICKNESS,
+        TALL_WALL_HEIGHT - SUNKEN_AREA_HEIGHT
+      ]
     );
   }
+
 }
 
 module flooring(flooring_color = "Sienna", gap_for_divider_wall = true) {
