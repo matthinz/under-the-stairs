@@ -528,8 +528,6 @@ module utilitarian() {
       text("Utilitarian");
   }
 
-
-
   subfloor();
 
   walls_and_ceiling();
@@ -585,58 +583,59 @@ module utilitarian() {
 
   shelf_thickness = (1/2) * INCH;
 
-  cube_at(
-    point = [
-      DRYWALL_THICKNESS,
-      shelf_inset,
-      shelf_start_z,
-    ],
-    size = [
-      TOTAL_WIDTH,
-      shelf_depth,
-      shelf_thickness
-    ]
-  );
+  color("Peru") {
+    cube_at(
+      point = [
+        DRYWALL_THICKNESS,
+        shelf_inset,
+        shelf_start_z,
+      ],
+      size = [
+        TOTAL_WIDTH,
+        shelf_depth,
+        shelf_thickness
+      ]
+    );
 
-  cube_at(
-    point = [
-      DRYWALL_THICKNESS,
-      shelf_inset,
-      shelf_start_z + (shelf_thickness + shelf_height) * 1,
-    ],
-    size = [
-      TOTAL_WIDTH,
-      shelf_depth,
-      shelf_thickness
-    ]
-  );
+    cube_at(
+      point = [
+        DRYWALL_THICKNESS,
+        shelf_inset,
+        shelf_start_z + (shelf_thickness + shelf_height) * 1,
+      ],
+      size = [
+        TOTAL_WIDTH,
+        shelf_depth,
+        shelf_thickness
+      ]
+    );
 
-  cube_at(
-    point = [
-      DRYWALL_THICKNESS,
-      shelf_inset,
-      shelf_start_z + (shelf_thickness + shelf_height) * 2,
-    ],
-    size = [
-      TOTAL_WIDTH,
-      shelf_depth,
-      shelf_thickness
-    ]
-  );
+    cube_at(
+      point = [
+        DRYWALL_THICKNESS,
+        shelf_inset,
+        shelf_start_z + (shelf_thickness + shelf_height) * 2,
+      ],
+      size = [
+        TOTAL_WIDTH,
+        shelf_depth,
+        shelf_thickness
+      ]
+    );
 
-  cube_at(
-    point = [
-      DRYWALL_THICKNESS,
-      shelf_inset,
-      shelf_start_z + (shelf_thickness + shelf_height) * 3,
-    ],
-    size = [
-      TOTAL_WIDTH,
-      shelf_depth,
-      shelf_thickness
-    ]
-  );
-
+    cube_at(
+      point = [
+        DRYWALL_THICKNESS,
+        shelf_inset,
+        shelf_start_z + (shelf_thickness + shelf_height) * 3,
+      ],
+      size = [
+        TOTAL_WIDTH,
+        shelf_depth,
+        shelf_thickness
+      ]
+    );
+  }
 
 }
 
