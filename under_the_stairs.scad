@@ -1,5 +1,6 @@
 include <utils.scad>;
 include <litter_box.scad>;
+include <freezer.scad>;
 
 TOTAL_WIDTH = 66 * INCHES;
 
@@ -17,6 +18,7 @@ TOTAL_DEPTH = ENTRY_SIDE_DEPTH + HALLWAY_SIDE_DEPTH + DIVIDER_WALL_THICKNESS;
 
 SUNKEN_AREA_HEIGHT = (6 + (1/8)) * INCHES;
 SUNKEN_AREA_WIDTH = 21 * INCHES;
+SUNKEN_AREA_DEPTH = HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM - FLOORING_THICKNESS;;
 
 TALL_WALL_HEIGHT = (77 + (5/8)) * INCHES;
 
@@ -248,7 +250,7 @@ module walls_and_ceiling(paint_color = "LemonChiffon") {
   }
 }
 
-module flooring(flooring_color = "Sienna") {
+module flooring(flooring_color = "Sienna", gap_for_divider_wall = true) {
 
   color(flooring_color) {
 
@@ -309,42 +311,64 @@ module flooring(flooring_color = "Sienna") {
     );
 
     // Floor of entry side
-    cube_at(
-      point = [
-        DRYWALL_THICKNESS,
-        HALLWAY_SIDE_DEPTH + DIVIDER_WALL_THICKNESS + DIVIDER_WALL_TRIM,
-        SUBFLOOR_THICKNESS + SUNKEN_AREA_HEIGHT,
-      ],
-      size = [
-        TOTAL_WIDTH,
-        ENTRY_SIDE_DEPTH - DIVIDER_WALL_TRIM,
-        FLOORING_THICKNESS
-      ]
-    );
+    if (gap_for_divider_wall) {
+      cube_at(
+        point = [
+          DRYWALL_THICKNESS,
+          HALLWAY_SIDE_DEPTH + DIVIDER_WALL_THICKNESS + DIVIDER_WALL_TRIM,
+          SUBFLOOR_THICKNESS + SUNKEN_AREA_HEIGHT,
+        ],
+        size = [
+          TOTAL_WIDTH,
+          ENTRY_SIDE_DEPTH - DIVIDER_WALL_TRIM,
+          FLOORING_THICKNESS
+        ]
+      );
+    } else {
+      cube_at(
+        point = [
+          DRYWALL_THICKNESS,
+          HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM,
+          SUBFLOOR_THICKNESS + SUNKEN_AREA_HEIGHT,
+        ],
+        size = [
+          TOTAL_WIDTH,
+          DIVIDER_WALL_TRIM + DIVIDER_WALL_THICKNESS + ENTRY_SIDE_DEPTH,
+          FLOORING_THICKNESS
+        ]
+      );
+
+    }
   }
 }
 
-module divider_wall(divider_wall_color = "Peru") {
+module divider_wall(
+  door = true,
+  thickness = DIVIDER_WALL_THICKNESS,
+  trim = true,
+  divider_wall_color = "Peru",
+  y = HALLWAY_SIDE_DEPTH
+) {
 
   color(divider_wall_color) {
 
-    divider_wall_y = HALLWAY_SIDE_DEPTH;
+    divider_wall_y = y;
     tall_wall_top_z = SUBFLOOR_THICKNESS + FLOORING_THICKNESS + TALL_WALL_HEIGHT;
-    short_wall_top_z = SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT + SHORT_WALL_HEIGHT;
+    short_wall_top_z = SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT + SHORT_WALL_HEIGHT + FLOORING_THICKNESS;
     short_wall_bottom_z = SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT;
     short_wall_x = DRYWALL_THICKNESS + TOTAL_WIDTH;
 
     nw_front = [ DRYWALL_THICKNESS, divider_wall_y, tall_wall_top_z];
-    nw_back = [ DRYWALL_THICKNESS, divider_wall_y + DIVIDER_WALL_THICKNESS, short_wall_bottom_z];
+    nw_back = [ DRYWALL_THICKNESS, divider_wall_y + thickness, short_wall_bottom_z];
 
     ne_front = [short_wall_x, divider_wall_y, short_wall_top_z];
-    ne_back = [short_wall_x, divider_wall_y + DIVIDER_WALL_THICKNESS, short_wall_top_z];
+    ne_back = [short_wall_x, divider_wall_y + thickness, short_wall_top_z];
 
     se_front = [ short_wall_x, divider_wall_y, short_wall_bottom_z];
-    se_back = [ short_wall_x, divider_wall_y + DIVIDER_WALL_THICKNESS, short_wall_bottom_z];
+    se_back = [ short_wall_x, divider_wall_y + thickness, short_wall_bottom_z];
 
     sw_front = [ DRYWALL_THICKNESS, divider_wall_y,  short_wall_bottom_z];
-    sw_back = [ DRYWALL_THICKNESS, divider_wall_y + DIVIDER_WALL_THICKNESS, short_wall_bottom_z];
+    sw_back = [ DRYWALL_THICKNESS, divider_wall_y + thickness, short_wall_bottom_z];
 
     _nw_front = 0;
     _nw_back = 1;
@@ -370,7 +394,7 @@ module divider_wall(divider_wall_color = "Peru") {
 
     door_size = [
       12 * INCHES,
-      DIVIDER_WALL_THICKNESS,
+      thickness,
       (32 + (7/8)) * INCHES,
     ];
 
@@ -398,48 +422,52 @@ module divider_wall(divider_wall_color = "Peru") {
         convexity = 1
       );
 
-      cube_at(
-        point = [
-          door_point[0],
-          door_point[1] - (1 * INCHES),
-          door_point[2],
-        ],
-        size = [
-          door_size[0],
-          door_size[1] + (2 * INCHES),
-          door_size[2],
-        ]
-      );
+      if (door) {
+        cube_at(
+          point = [
+            door_point[0],
+            door_point[1] - (1 * INCHES),
+            door_point[2],
+          ],
+          size = [
+            door_size[0],
+            door_size[1] + (2 * INCHES),
+            door_size[2],
+          ]
+        );
+      }
     }
 
 
-    // Divider wall trim (hallway side)
-    cube_at(
-      point = [
-        DRYWALL_THICKNESS,
-        HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM,
-        SUBFLOOR_THICKNESS + SUNKEN_AREA_HEIGHT
-      ],
-      size = [
-        TOTAL_WIDTH,
-        DIVIDER_WALL_TRIM,
-        DIVIDER_WALL_TRIM_THICKNESS
-      ]
-    );
+    if (trim) {
+      // Divider wall trim (hallway side)
+      cube_at(
+        point = [
+          DRYWALL_THICKNESS,
+          HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM,
+          SUBFLOOR_THICKNESS + SUNKEN_AREA_HEIGHT
+        ],
+        size = [
+          TOTAL_WIDTH,
+          DIVIDER_WALL_TRIM,
+          DIVIDER_WALL_TRIM_THICKNESS
+        ]
+      );
 
-    // Divider wall trim (entry side)
-    cube_at(
-      point = [
-        DRYWALL_THICKNESS,
-        HALLWAY_SIDE_DEPTH + DIVIDER_WALL_THICKNESS,
-        SUBFLOOR_THICKNESS + SUNKEN_AREA_HEIGHT
-      ],
-      size = [
-        TOTAL_WIDTH,
-        DIVIDER_WALL_TRIM,
-        DIVIDER_WALL_TRIM_THICKNESS
-      ]
-    );
+      // Divider wall trim (entry side)
+      cube_at(
+        point = [
+          DRYWALL_THICKNESS,
+          HALLWAY_SIDE_DEPTH + DIVIDER_WALL_THICKNESS,
+          SUBFLOOR_THICKNESS + SUNKEN_AREA_HEIGHT
+        ],
+        size = [
+          TOTAL_WIDTH,
+          DIVIDER_WALL_TRIM,
+          DIVIDER_WALL_TRIM_THICKNESS
+        ]
+      );
+    }
   }
 }
 
@@ -472,10 +500,142 @@ module current() {
     litter_box();
 }
 
+module utilitarian() {
 
-translate([TOTAL_WIDTH * -1.5, 0, 0])
-  current();
+  color("Black") {
+    translate([
+      0,
+      0,
+      TALL_WALL_HEIGHT + 12 * INCHES
+    ])
+    rotate([90, 0, 0])
+      text("Utilitarian");
+  }
+
+
 
   subfloor();
 
   walls_and_ceiling();
+
+  flooring(gap_for_divider_wall = false);
+
+  translate([
+    (LITTER_BOX_WIDTH / 2) + TOTAL_WIDTH - (LITTER_BOX_WIDTH + 2 * INCHES),
+    (LITTER_BOX_DEPTH / 2) + TOTAL_DEPTH - (LITTER_BOX_DEPTH + 2 * INCHES),
+    (LITTER_BOX_HEIGHT / 2) + SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT
+  ])
+  rotate([0, 0, 180])
+    litter_box();
+
+  translate([
+    (FREEZER_WIDTH / 2) + DRYWALL_THICKNESS + (2 * INCHES),
+    (FREEZER_DEPTH / 2) + TOTAL_DEPTH - FREEZER_DEPTH,
+    (FREEZER_HEIGHT / 2) + SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT
+  ])
+    rotate([0, 0, 180])
+    freezer(open = true);
+
+  // New divider wall
+
+  divider_wall(
+    divider_wall_color = "LemonChiffon",
+    door = false,
+    thickness = DRYWALL_THICKNESS + QUOTE_TWO + DRYWALL_THICKNESS,
+    trim = false,
+    y = HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM - QUOTE_FOUR - (6 * INCHES) - DRYWALL_THICKNESS
+  );
+
+  color("LemonChiffon") {
+    cube_at(
+      point = [
+        DRYWALL_THICKNESS,
+        HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM - QUOTE_FOUR - (6 * INCHES) - DRYWALL_THICKNESS,
+        SUBFLOOR_THICKNESS + FLOORING_THICKNESS,
+      ],
+      size = [
+        SUNKEN_AREA_WIDTH,
+        DRYWALL_THICKNESS,
+        SUNKEN_AREA_HEIGHT
+      ]
+    );
+  }
+
+  shelf_inset = 2 * INCHES;
+  shelf_depth = HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM - (6 * INCHES) - DRYWALL_THICKNESS - QUOTE_FOUR - DRYWALL_THICKNESS - shelf_inset;
+  shelf_height = 12 * INCHES;
+
+  shelf_start_z = SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT + shelf_height;
+
+  shelf_thickness = (1/2) * INCH;
+
+  cube_at(
+    point = [
+      DRYWALL_THICKNESS,
+      shelf_inset,
+      shelf_start_z,
+    ],
+    size = [
+      TOTAL_WIDTH,
+      shelf_depth,
+      shelf_thickness
+    ]
+  );
+
+  cube_at(
+    point = [
+      DRYWALL_THICKNESS,
+      shelf_inset,
+      shelf_start_z + (shelf_thickness + shelf_height) * 1,
+    ],
+    size = [
+      TOTAL_WIDTH,
+      shelf_depth,
+      shelf_thickness
+    ]
+  );
+
+  cube_at(
+    point = [
+      DRYWALL_THICKNESS,
+      shelf_inset,
+      shelf_start_z + (shelf_thickness + shelf_height) * 2,
+    ],
+    size = [
+      TOTAL_WIDTH,
+      shelf_depth,
+      shelf_thickness
+    ]
+  );
+
+  cube_at(
+    point = [
+      DRYWALL_THICKNESS,
+      shelf_inset,
+      shelf_start_z + (shelf_thickness + shelf_height) * 3,
+    ],
+    size = [
+      TOTAL_WIDTH,
+      shelf_depth,
+      shelf_thickness
+    ]
+  );
+
+
+}
+
+color("Black") {
+  translate([-2.5 * FEET, -2 * FOOT, 0])
+    text("Hallway", size = 1 * FOOT);
+
+  translate([1.5 * FEET, TOTAL_DEPTH + 2 * FEET, 0])
+    rotate([0, 0, 180])
+    text("Entry", size = 1 * FOOT);
+
+}
+
+translate([TOTAL_WIDTH * -1.5, 0, 0])
+  current();
+
+translate([TOTAL_WIDTH * .5, 0, 0])
+  utilitarian();
