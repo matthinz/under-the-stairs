@@ -30,6 +30,10 @@ WALL_THICKNESS = DRYWALL_THICKNESS + QUOTE_FOUR + DRYWALL_THICKNESS;
 // wall with rotated 2x4 studs
 THIN_WALL_THICKNESS = DRYWALL_THICKNESS + QUOTE_TWO + DRYWALL_THICKNESS;
 
+POWER_OUTLET_WIDTH = 3 * INCHES;
+POWER_OUTLET_HEIGHT = 4 + (5/8) * INCHES;
+POWER_OUTLET_DEPTH = (1/4) * INCHES;
+
 module subfloor(subfloor_color = "Gray") {
 
   color(subfloor_color) {
@@ -450,6 +454,31 @@ module divider_wall(
   }
 }
 
+module power_outlet() {
+  color("White") {
+    cube(
+      [
+        POWER_OUTLET_WIDTH,
+        POWER_OUTLET_DEPTH,
+        POWER_OUTLET_HEIGHT
+      ],
+      center = true
+    );
+  }
+}
+
+module current_power_outlet() {
+  translate([
+    (POWER_OUTLET_DEPTH / 2) + TOTAL_WIDTH - POWER_OUTLET_DEPTH,
+    (POWER_OUTLET_WIDTH / 2) + (3  + (1/4) * INCHES),
+    (POWER_OUTLET_HEIGHT / 2) +
+      SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT +
+        (13 + (7/8)) * INCHES
+  ])
+    rotate([0, 0, 90])
+    power_outlet();
+}
+
 module current() {
 
   color("Black") {
@@ -465,6 +494,8 @@ module current() {
   subfloor();
 
   walls_and_ceiling();
+
+  current_power_outlet();
 
   flooring();
 

@@ -14,3 +14,6 @@ module cube_at(point, size) {
     translate(size / 2)
       cube(size, center = true);
 }
+
+
+function sum(v, i = 0) = i < len(v) ? v[i] + sum(v, i + 1) : 0;

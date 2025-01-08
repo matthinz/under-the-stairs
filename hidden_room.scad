@@ -1,3 +1,4 @@
+include <books.scad>;
 include <current.scad>;
 
 module hidden_room() {
@@ -99,6 +100,8 @@ module hidden_room() {
 
   }
 
+  current_power_outlet();
+
   shelf_inset = 2 * INCHES;
 
   module shelves(
@@ -141,42 +144,24 @@ module hidden_room() {
     available_height = 1.5 * FEET
   );
 
-
   // entry-side shelves
   color("Peru") {
     shelf_inset = 2 * INCHES;
     shelf_depth = ENTRY_SIDE_DEPTH - shelf_inset;
-
-    cube_at(
-      point = [
-        DRYWALL_THICKNESS,
-        HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM - FLOORING_THICKNESS + WALL_THICKNESS,
-        SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT + (30 * INCHES),
-      ],
-      size =[
-        SUNKEN_AREA_WIDTH,
-        shelf_depth,
-        (1/2) * INCHES
-      ]
-    );
-
-    cube_at(
-      point = [
-        DRYWALL_THICKNESS,
-        HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM - FLOORING_THICKNESS + WALL_THICKNESS,
-        SUBFLOOR_THICKNESS + FLOORING_THICKNESS + SUNKEN_AREA_HEIGHT + (42 * INCHES),
-      ],
-      size =[
-        SUNKEN_AREA_WIDTH,
-        shelf_depth,
-        (1/2) * INCHES
-      ]
-    );
   }
 
 
-
-
+  // Put some books on the shelves
+  shelf_depth = HALLWAY_SIDE_DEPTH - DIVIDER_WALL_TRIM - THIN_WALL_THICKNESS - shelf_inset;
+  translate([
+    DRYWALL_THICKNESS + (BOOKS_WIDTH / 2),
+    (BOOKS_DEPTH / 2) + shelf_inset + (shelf_depth - BOOKS_DEPTH),
+    (BOOKS_HEIGHT / 2) +
+      SUBFLOOR_THICKNESS +
+      FLOORING_THICKNESS +
+      SUNKEN_AREA_HEIGHT + (20.5 * INCHES),
+  ])
+    books();
 
   translate([
     (LITTER_BOX_WIDTH / 2) + DRYWALL_THICKNESS + 4 * INCHES,
@@ -185,5 +170,4 @@ module hidden_room() {
   ])
     rotate([0, 0, 180])
     litter_box();
-
 }
